@@ -6,7 +6,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <RootNamespace>WCCG.PAS.Referrals.UI</RootNamespace>
+    <UserSecretsId>4fb31fd4-3e49-4ada-99dc-155e8f922563</UserSecretsId>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="1.13.2" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.22.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.47.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Include="..\..\.dockerignore">
@@ -15,9 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="..\..\README.md">
-      <Link>README.md</Link>
-    </Content>
+    <Content Include="..\..\README.md" Link="README.md" />
   </ItemGroup>
 
 </Project>

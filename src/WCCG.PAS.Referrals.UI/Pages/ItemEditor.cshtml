@@ -1,0 +1,39 @@
+@page
+@model WCCG.PAS.Referrals.UI.Pages.ItemEditorModel
+
+<div class="fs-5 mb-4">
+  <a class="link-secondary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover" href="/">
+    Back to list
+  </a>
+</div>
+
+<form asp-page="/ItemEditor" method="post">
+
+  <textarea asp-for="ReferralJson" id="code"></textarea>
+  <div class="float-end mt-3">
+    @if (Model.IsSaved is not null)
+    {
+      if (Model.IsSaved.Value)
+      {
+        <p class="text-success d-inline-block mt-2 mx-4 fs-5">
+          Saved successfully
+        </p>
+      }
+      else
+      {
+        <p class="text-danger d-inline-block mt-2 mx-4 fs-5">
+         @Html.Raw(Model.ErrorMessage)
+        </p>
+      }
+    }
+    <input class="btn btn-primary btn-lg save-button" type="submit" value="Save"/>
+  </div>
+</form>
+
+@section scripts{
+  <script src="~/js/codemirror/codemirror.min.js"></script>
+  <script src="~/js/codemirror/closebrackets.min.js"></script>
+  <script src="~/js/codemirror/codemirrorHelper.js"></script>
+  <script src="~/js/codemirror/matchbrackets.min.js"></script>
+  <script src="~/js/itemEditor.js"></script>
+}
