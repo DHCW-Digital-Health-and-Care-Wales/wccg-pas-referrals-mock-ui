@@ -19,6 +19,8 @@ builder.Services.AddServices();
 
 var app = builder.Build();
 
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
