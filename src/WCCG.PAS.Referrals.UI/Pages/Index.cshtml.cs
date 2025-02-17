@@ -1,18 +1,22 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using WCCG.PAS.Referrals.UI.DbModels;
+using WCCG.PAS.Referrals.UI.Services;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
+    private readonly IReferralService _service;
 
-    public IndexModel(ILogger<IndexModel> logger)
+    public IndexModel(IReferralService service)
     {
-        _logger = logger;
+        _service = service;
     }
 
-    public void OnGet()
+    public IEnumerable<ReferralDbModel> Referrals { get; set; } = [];
+
+    public async Task OnGet()
     {
+        Referrals = await _service.GetAllAsync();
     }
 }
