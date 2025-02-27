@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 using Azure.Identity;
 using FluentValidation;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -33,40 +34,52 @@ public static class ServiceCollectionExtensions
 
     public static void AddCosmosClient(this IServiceCollection services, IHostEnvironment environment)
     {
-        var cosmosClientOptions = new CosmosClientOptions
-        {
-            SerializerOptions = new CosmosSerializationOptions { PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase }
-        };
+        // var cosmosClientOptions = new CosmosClientOptions
+        // {
+        //     SerializerOptions = new CosmosSerializationOptions { PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase }
+        // };
+        //
+        // if (environment.IsDevelopment())
+        // {
+        //     services.AddSingleton(provider =>
+        //     {
+        //         var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
+        //         return new CosmosClient(cosmosConfig?.DatabaseEndpoint, new AzureCliCredential(), cosmosClientOptions);
+        //     });
+        //     return;
+        // }
+        //
+        // services.AddSingleton(provider =>
+        // {
+        //     var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
+        //     var managedIdentityConfig = provider.GetService<IOptions<ManagedIdentityConfig>>()?.Value;
+        //
+        //     return new CosmosClient(
+        //         cosmosConfig?.DatabaseEndpoint,
+        //         new ManagedIdentityCredential(managedIdentityConfig?.ClientId),
+        //         cosmosClientOptions);
+        // });
 
-        if (environment.IsDevelopment())
+        services.AddHttpClient(CosmosConfig.CosmosHttpClientName, (provider, client) =>
         {
-            services.AddSingleton(provider =>
-            {
-                var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
-                return new CosmosClient(cosmosConfig?.DatabaseEndpoint, new AzureCliCredential(), cosmosClientOptions);
-            });
-            return;
-        }
+            var cosmosConfig = provider.GetRequiredService<IOptions<CosmosConfig>>().Value;
 
-        services.AddSingleton(provider =>
-        {
-            var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
-            var managedIdentityConfig = provider.GetService<IOptions<ManagedIdentityConfig>>()?.Value;
-
-            return new CosmosClient(
-                cosmosConfig?.DatabaseEndpoint,
-                new ManagedIdentityCredential(managedIdentityConfig?.ClientId),
-                cosmosClientOptions);
+            client.BaseAddress = new Uri(cosmosConfig.ApimEndpoint);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add(cosmosConfig.ApimSubscriptionHeaderName, cosmosConfig.ApimSubscriptionKey);
+            client.Timeout = TimeSpan.FromSeconds(cosmosConfig.TimeoutSeconds);
         });
     }
 
     public static void AddCosmosRepositories(this IServiceCollection services)
     {
-        services.AddSingleton<ICosmosRepository<ReferralDbModel>>(provider =>
-        {
-            var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
-            return new CosmosRepository<ReferralDbModel>(provider.GetService<CosmosClient>()!, cosmosConfig!);
-        });
+        // services.AddSingleton<ICosmosRepository<ReferralDbModel>>(provider =>
+        // {
+        //     var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
+        //     return new CosmosRepository<ReferralDbModel>(provider.GetService<CosmosClient>()!, cosmosConfig!);
+        // });
+
+        services.AddSingleton<ICosmosRepository<ReferralDbModel>, CosmosRestRepository<ReferralDbModel>>();
     }
 
     public static void AddServices(this IServiceCollection services)

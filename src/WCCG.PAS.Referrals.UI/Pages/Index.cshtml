@@ -10,7 +10,8 @@
   </tr>
   </thead>
   <tbody>
-  @foreach(var referral in Model.Referrals)
+  <h2>Number of items - @Model.Referrals.Count()</h2>
+  @foreach (var referral in Model.Referrals)
   {
     <tr>
       <td>@referral.Id</td>

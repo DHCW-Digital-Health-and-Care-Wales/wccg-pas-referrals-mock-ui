@@ -2,9 +2,13 @@ using System.Text.Json;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Extensions;
 using WCCG.PAS.Referrals.UI.Services;
+using JsonException = System.Text.Json.JsonException;
+using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
 
@@ -31,9 +35,9 @@ public class ItemEditorModel : PageModel
 
     public async Task OnGet(string id)
     {
-        var referral = await _referralService.GetByIdAsync(id);
+        var referral = await _referralService.GetByIdRawAsync(id);
 
-        ReferralJson = JsonSerializer.Serialize(referral, _jsonOptions);
+        ReferralJson = JToken.Parse(referral).ToString(Formatting.Indented);
     }
 
     public async Task<IActionResult> OnPost()
