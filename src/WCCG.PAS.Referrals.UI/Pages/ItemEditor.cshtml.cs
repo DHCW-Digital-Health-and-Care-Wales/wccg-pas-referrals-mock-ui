@@ -2,8 +2,6 @@ using System.Text.Json;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Extensions;
 using WCCG.PAS.Referrals.UI.Services;

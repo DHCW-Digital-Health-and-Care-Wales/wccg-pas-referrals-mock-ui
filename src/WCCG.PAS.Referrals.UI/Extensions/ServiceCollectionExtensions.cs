@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using Azure.Identity;
 using FluentValidation;
 using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 using WCCG.PAS.Referrals.UI.Configs;
 using WCCG.PAS.Referrals.UI.DbModels;
@@ -34,32 +33,6 @@ public static class ServiceCollectionExtensions
 
     public static void AddCosmosClient(this IServiceCollection services, IHostEnvironment environment)
     {
-        // var cosmosClientOptions = new CosmosClientOptions
-        // {
-        //     SerializerOptions = new CosmosSerializationOptions { PropertyNamingPolicy = CosmosPropertyNamingPolicy.CamelCase }
-        // };
-        //
-        // if (environment.IsDevelopment())
-        // {
-        //     services.AddSingleton(provider =>
-        //     {
-        //         var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
-        //         return new CosmosClient(cosmosConfig?.DatabaseEndpoint, new AzureCliCredential(), cosmosClientOptions);
-        //     });
-        //     return;
-        // }
-        //
-        // services.AddSingleton(provider =>
-        // {
-        //     var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
-        //     var managedIdentityConfig = provider.GetService<IOptions<ManagedIdentityConfig>>()?.Value;
-        //
-        //     return new CosmosClient(
-        //         cosmosConfig?.DatabaseEndpoint,
-        //         new ManagedIdentityCredential(managedIdentityConfig?.ClientId),
-        //         cosmosClientOptions);
-        // });
-
         services.AddHttpClient(CosmosConfig.CosmosHttpClientName, (provider, client) =>
         {
             var cosmosConfig = provider.GetRequiredService<IOptions<CosmosConfig>>().Value;
@@ -73,12 +46,6 @@ public static class ServiceCollectionExtensions
 
     public static void AddCosmosRepositories(this IServiceCollection services)
     {
-        // services.AddSingleton<ICosmosRepository<ReferralDbModel>>(provider =>
-        // {
-        //     var cosmosConfig = provider.GetService<IOptions<CosmosConfig>>()?.Value;
-        //     return new CosmosRepository<ReferralDbModel>(provider.GetService<CosmosClient>()!, cosmosConfig!);
-        // });
-
         services.AddSingleton<ICosmosRepository<ReferralDbModel>, CosmosRestRepository<ReferralDbModel>>();
     }
 
