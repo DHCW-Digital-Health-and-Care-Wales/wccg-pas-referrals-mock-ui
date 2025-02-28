@@ -17,6 +17,13 @@ public class ItemEditorModel : PageModel
     private readonly IReferralService _referralService;
     private readonly IValidator<ReferralDbModel> _validator;
     private readonly ILogger<ItemEditorModel> _logger;
+    private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
+
+    public bool? IsSaved { get; set; }
+    public string? ErrorMessage { get; set; }
+
+    [BindProperty]
+    public required string? ReferralJson { get; set; }
 
     public ItemEditorModel(IReferralService referralService, IValidator<ReferralDbModel> validator, ILogger<ItemEditorModel> logger)
     {
@@ -25,19 +32,11 @@ public class ItemEditorModel : PageModel
         _logger = logger;
     }
 
-    [BindProperty]
-    public required string? ReferralJson { get; set; }
-
-    public bool? IsSaved { get; set; }
-    public string? ErrorMessage { get; set; }
-
-    private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
-
     public async Task OnGet(string id)
     {
-        var referral = await _referralService.GetByIdRawAsync(id);
+        var referral = await _referralService.GetByIdAsync(id);
 
-        ReferralJson = JToken.Parse(referral).ToString(Formatting.Indented);
+        ReferralJson = JsonSerializer.Serialize(referral, _jsonOptions);
     }
 
     public async Task<IActionResult> OnPost()

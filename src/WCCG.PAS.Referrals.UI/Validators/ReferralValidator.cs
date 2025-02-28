@@ -7,7 +7,7 @@ public class ReferralValidator : AbstractValidator<ReferralDbModel>
 {
     public ReferralValidator()
     {
-        RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.ReferralId).NotEmpty();
         RuleFor(x => x.CaseNumber).NotEmpty();
     }
 }

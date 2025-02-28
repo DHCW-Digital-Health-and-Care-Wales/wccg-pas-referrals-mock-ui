@@ -26,9 +26,4 @@ public class ReferralService : IReferralService
     {
         return await _repository.GetByIdAsync(id);
     }
-
-    public async Task<string> GetByIdRawAsync(string id)
-    {
-        return await _repository.GetByIdRawAsync(id);
-    }
 }

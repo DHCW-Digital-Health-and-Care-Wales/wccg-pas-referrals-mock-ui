@@ -19,4 +19,10 @@ public static partial class LoggerExtensions
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Error retrieving document from Cosmos DB for id: {documentId}.")]
     public static partial void LogErrorRetrievingDocumentById(this ILogger logger, Exception exception, string documentId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error creating new document in Cosmos DB. Reason: {reason}")]
+    public static partial void LogErrorCreatingNewDocumentById(this ILogger logger, Exception? exception, string reason = "N/A");
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "New document with id: {documentId} has been added.")]
+    public static partial void LogNewDocumentCreated(this ILogger logger, string documentId);
 }

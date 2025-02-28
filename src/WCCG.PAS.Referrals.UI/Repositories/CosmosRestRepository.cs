@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using WCCG.PAS.Referrals.UI.Configs;
@@ -16,6 +17,7 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
 
     private const string MaxItemCountHeaderName = "max-item-count";
     private const string ContinuationTokenHeaderName = "x-ms-continuation";
+    private const string UpsertHeaderName = "is-upsert";
     private const int DefaultMaxItemCount = 10;
 
     public CosmosRestRepository(ILogger<CosmosRestRepository<T>> logger, IHttpClientFactory httpClientFactory, IOptions<CosmosConfig> cosmosConfig)
@@ -51,7 +53,7 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         try
         {
             using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
-            using var request = new HttpRequestMessage(HttpMethod.Get, _cosmosConfig.ApimGetAllEndpoint);
+            using var request = new HttpRequestMessage(HttpMethod.Get, _cosmosConfig.ApimGetAllDocumentsEndpoint);
             request.Headers.Add(MaxItemCountHeaderName, $"{maxItemCount}");
 
             if (!string.IsNullOrWhiteSpace(continuationToken))
@@ -83,7 +85,7 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         {
             using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
 
-            var endpointPath = string.Format(CultureInfo.InvariantCulture, _cosmosConfig.ApimGetByIdEndpoint, id);
+            var endpointPath = string.Format(CultureInfo.InvariantCulture, _cosmosConfig.ApimGetDocumentByIdEndpoint, id);
             using var request = new HttpRequestMessage(HttpMethod.Get, endpointPath);
 
             var response = await client.SendAsync(request);
@@ -101,31 +103,60 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         }
     }
 
-    public async Task<string> GetByIdRawAsync(string id)
+    public async Task<bool> UpsertAsync(T item)
     {
         try
         {
             using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
+            using var request = new HttpRequestMessage(HttpMethod.Post, _cosmosConfig.ApimCreateDocumentEndpoint);
 
-            var endpointPath = string.Format(CultureInfo.InvariantCulture, _cosmosConfig.ApimGetByIdEndpoint, id);
-            using var request = new HttpRequestMessage(HttpMethod.Get, endpointPath);
+            var documentJson = JsonSerializer.Serialize(item, _jsonSerializerOptions);
+            request.Content = new StringContent(documentJson, Encoding.UTF8, "application/json");
+            request.Headers.Add(UpsertHeaderName, bool.TrueString);
 
             var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
             var content = await response.Content.ReadAsStringAsync();
 
-            return content;
+            if (response.IsSuccessStatusCode)
+            {
+                var documentsResponse = JsonSerializer.Deserialize<JsonElement>(content, _jsonSerializerOptions);
+                _logger.LogNewDocumentCreated(documentsResponse.GetProperty("id").GetRawText());
+
+                return true;
+            }
+
+            var exception = new HttpRequestException(ParseErrorResponse(content));
+            _logger.LogErrorCreatingNewDocumentById(exception);
+            throw exception;
+
         }
         catch (Exception ex)
         {
-            _logger.LogErrorRetrievingDocumentById(ex, id);
+            _logger.LogErrorCreatingNewDocumentById(ex);
             throw;
         }
     }
 
-    public Task<bool> UpsertAsync(T item)
+    private static string? ParseErrorResponse(string responseContent)
     {
-        throw new NotImplementedException();
+        try
+        {
+            using var document = JsonDocument.Parse(responseContent);
+
+            if (document.RootElement.TryGetProperty("message", out var messageElement))
+            {
+                return messageElement.GetString();
+            }
+            if (document.RootElement.TryGetProperty("error", out var errorElement) && errorElement.TryGetProperty("message", out var errorMessageElement))
+            {
+                return errorMessageElement.GetString();
+            }
+
+            return responseContent;
+        }
+        catch
+        {
+            return responseContent;
+        }
     }
 }

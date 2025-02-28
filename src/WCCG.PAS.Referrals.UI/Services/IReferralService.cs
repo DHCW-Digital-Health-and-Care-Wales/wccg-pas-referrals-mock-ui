@@ -7,5 +7,4 @@ public interface IReferralService
     Task<bool> UpsertAsync(ReferralDbModel item);
     Task<IEnumerable<ReferralDbModel>> GetAllAsync();
     Task<ReferralDbModel> GetByIdAsync(string id);
-    Task<string> GetByIdRawAsync(string id);
 }
