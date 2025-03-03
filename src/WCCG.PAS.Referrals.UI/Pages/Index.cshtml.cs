@@ -6,17 +6,17 @@ namespace WCCG.PAS.Referrals.UI.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly IReferralService _service;
+    private readonly IReferralService _referralService;
 
-    public IndexModel(IReferralService service)
+    public IndexModel(IReferralService referralService)
     {
-        _service = service;
+        _referralService = referralService;
     }
 
     public IEnumerable<ReferralDbModel> Referrals { get; set; } = [];
 
     public async Task OnGet()
     {
-        Referrals = await _service.GetAllAsync();
+        Referrals = await _referralService.GetAllAsync();
     }
 }

@@ -4,19 +4,20 @@
 <table class="table table-hover fs-4">
   <thead>
   <tr>
-    <th scope="col">Id</th>
+    <th scope="col">Referral Id</th>
     <th scope="col">Case number</th>
     <th scope="col"></th>
   </tr>
   </thead>
   <tbody>
-  @foreach(var referral in Model.Referrals)
+  <h2>Number of items - @Model.Referrals.Count()</h2>
+  @foreach (var referral in Model.Referrals)
   {
     <tr>
-      <td>@referral.Id</td>
+      <td>@referral.ReferralId</td>
       <td>@referral.CaseNumber</td>
       <td>
-        <a asp-page="/ItemEditor" asp-route-id="@referral.Id">Edit</a>
+        <a asp-page="/ItemEditor" asp-route-id="@referral.ReferralId">Edit</a>
       </td>
     </tr>
   }

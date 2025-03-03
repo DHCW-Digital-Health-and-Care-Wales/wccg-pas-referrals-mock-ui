@@ -45,12 +45,12 @@ public class ItemEditorModelTests
         _fixture.Mock<IReferralService>().Setup(r => r.GetByIdAsync(It.IsAny<string>()))
             .ReturnsAsync(_referralDbModel);
         //Act
-        await _sut.OnGet(_referralDbModel.Id!);
+        await _sut.OnGet(_referralDbModel.ReferralId!);
 
         //Assert
         _sut.ReferralJson.Should().Be(expectedJson);
 
-        _fixture.Mock<IReferralService>().Verify(r => r.GetByIdAsync(_referralDbModel.Id!));
+        _fixture.Mock<IReferralService>().Verify(r => r.GetByIdAsync(_referralDbModel.ReferralId!));
     }
 
     [Fact]

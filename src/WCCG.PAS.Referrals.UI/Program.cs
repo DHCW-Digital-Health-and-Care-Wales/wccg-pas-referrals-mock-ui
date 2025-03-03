@@ -1,18 +1,19 @@
-using WCCG.PAS.Referrals.UI.Configs;
+using Microsoft.Extensions.Options;
+using WCCG.PAS.Referrals.UI.Configuration;
 using WCCG.PAS.Referrals.UI.Extensions;
+using ValidateCosmosConfigOptions = WCCG.PAS.Referrals.UI.Configuration.OptionValidators.ValidateCosmosConfigOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-builder.Services.Configure<CosmosConfig>(builder.Configuration.GetSection("Cosmos"));
-builder.Services.Configure<ManagedIdentityConfig>(builder.Configuration.GetSection("ManagedIdentity"));
+builder.Services.AddOptions<CosmosConfig>().Bind(builder.Configuration.GetSection(CosmosConfig.SectionName));
+builder.Services.AddSingleton<IValidateOptions<CosmosConfig>, ValidateCosmosConfigOptions>();
 
-var clientId = builder.Configuration.GetValue<string>("ManagedIdentity:ClientId")!;
-builder.Services.AddApplicationInsights(builder.Environment, clientId);
+builder.Services.AddApplicationInsights(builder.Environment.IsDevelopment(), builder.Configuration);
 
-builder.Services.AddCosmosClient(builder.Environment);
+builder.Services.AddCosmosClient();
 builder.Services.AddCosmosRepositories();
 builder.Services.AddValidators();
 builder.Services.AddServices();

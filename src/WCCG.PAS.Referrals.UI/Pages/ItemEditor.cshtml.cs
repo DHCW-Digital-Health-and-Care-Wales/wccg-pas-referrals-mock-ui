@@ -13,6 +13,13 @@ public class ItemEditorModel : PageModel
     private readonly IReferralService _referralService;
     private readonly IValidator<ReferralDbModel> _validator;
     private readonly ILogger<ItemEditorModel> _logger;
+    private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
+
+    public bool? IsSaved { get; set; }
+    public string? ErrorMessage { get; set; }
+
+    [BindProperty]
+    public required string? ReferralJson { get; set; }
 
     public ItemEditorModel(IReferralService referralService, IValidator<ReferralDbModel> validator, ILogger<ItemEditorModel> logger)
     {
@@ -20,14 +27,6 @@ public class ItemEditorModel : PageModel
         _validator = validator;
         _logger = logger;
     }
-
-    [BindProperty]
-    public required string? ReferralJson { get; set; }
-
-    public bool? IsSaved { get; set; }
-    public string? ErrorMessage { get; set; }
-
-    private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
 
     public async Task OnGet(string id)
     {
@@ -99,7 +98,6 @@ public class ItemEditorModel : PageModel
         }
         catch (Exception ex)
         {
-            _logger.FailedToUpsertReferral(ex);
             HandleErrors(ex.Message);
         }
     }

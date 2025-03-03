@@ -23,14 +23,14 @@ public class ReferralValidatorTests
     {
         //Arrange
         var referral = _fixture.Build<ReferralDbModel>()
-            .With(x => x.Id, id)
+            .With(x => x.ReferralId, id)
             .Create();
 
         //Act
         var result = await _sut.TestValidateAsync(referral);
 
         //Assert
-        result.ShouldHaveValidationErrorFor(x => x.Id);
+        result.ShouldHaveValidationErrorFor(x => x.ReferralId);
     }
 
     [Theory]
