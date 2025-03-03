@@ -41,7 +41,7 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
 
         var maxItemCount = _cosmosConfig.MaxItemCountPerQuery.ToString(CultureInfo.InvariantCulture);
-        client.DefaultRequestHeaders.Add(MaxItemCountHeaderName, [maxItemCount]);
+        client.DefaultRequestHeaders.Add(MaxItemCountHeaderName, maxItemCount);
 
         var result = new List<T>();
         string? continuationToken = null;
@@ -62,7 +62,7 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         try
         {
             client.DefaultRequestHeaders.Remove(ContinuationTokenHeaderName);
-            client.DefaultRequestHeaders.Add(ContinuationTokenHeaderName, [continuationToken ?? string.Empty]);
+            client.DefaultRequestHeaders.Add(ContinuationTokenHeaderName, continuationToken ?? string.Empty);
 
             var response = await client.GetAsync(_cosmosConfig.ApimGetAllDocumentsEndpoint);
             await response.EnsureSuccessStatusCodeWithDataAsync(response.Content);
@@ -129,10 +129,6 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
                     break;
                 default:
                     throw new NotSupportedException();
-            }
-
-            if (response.StatusCode == HttpStatusCode.Created)
-            {
             }
 
             return true;

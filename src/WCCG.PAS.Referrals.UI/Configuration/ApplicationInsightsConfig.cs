@@ -7,5 +7,5 @@ public class ApplicationInsightsConfig
 {
     public static string SectionName => "ApplicationInsights";
 
-    public required string ConnectionString { get; set; }
+    public required string ConnectionString { get; init; }
 }

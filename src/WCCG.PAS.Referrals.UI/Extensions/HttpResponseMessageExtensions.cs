@@ -14,10 +14,9 @@ public static class HttpResponseMessageExtensions
         }
 
         var exception =
-            new HttpRequestException(
-                string.Format(CultureInfo.InvariantCulture, "Response status code does not indicate success: {0} ({1})",
-                    (int)responseMessage.StatusCode,
-                    responseMessage.ReasonPhrase), null, responseMessage.StatusCode);
+            new HttpRequestException(string.Format(CultureInfo.InvariantCulture,
+                "Response status code does not indicate success: {0} ({1})",
+                (int)responseMessage.StatusCode, responseMessage.ReasonPhrase), null, responseMessage.StatusCode);
         var content = await httpContent.ReadFromJsonAsync<JsonElement>();
 
         if (content.TryGetProperty("message", out var messageElement))
