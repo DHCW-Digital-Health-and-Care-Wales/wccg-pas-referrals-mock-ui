@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace WCCG.PAS.Referrals.UI.Configs;
+namespace WCCG.PAS.Referrals.UI.Configuration;
 
 [ExcludeFromCodeCoverage]
 public class ApplicationInsightsConfig

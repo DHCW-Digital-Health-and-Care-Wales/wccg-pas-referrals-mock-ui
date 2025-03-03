@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
-using WCCG.PAS.Referrals.UI.Configs;
-using WCCG.PAS.Referrals.UI.Configs.OptionValidators;
+using WCCG.PAS.Referrals.UI.Configuration;
 using WCCG.PAS.Referrals.UI.Extensions;
+using ValidateCosmosConfigOptions = WCCG.PAS.Referrals.UI.Configuration.OptionValidators.ValidateCosmosConfigOptions;
 
 var builder = WebApplication.CreateBuilder(args);
 

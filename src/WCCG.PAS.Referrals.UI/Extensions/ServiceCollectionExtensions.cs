@@ -5,7 +5,7 @@ using Azure.Identity;
 using FluentValidation;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Options;
-using WCCG.PAS.Referrals.UI.Configs;
+using WCCG.PAS.Referrals.UI.Configuration;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Repositories;
 using WCCG.PAS.Referrals.UI.Services;

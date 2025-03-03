@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using WCCG.PAS.Referrals.UI.Configs;
+using WCCG.PAS.Referrals.UI.Configuration;
 using WCCG.PAS.Referrals.UI.Extensions;
 using WCCG.PAS.Referrals.UI.Models;
 

@@ -5,7 +5,7 @@ using AutoFixture;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
 using RichardSzalay.MockHttp;
-using WCCG.PAS.Referrals.UI.Configs;
+using WCCG.PAS.Referrals.UI.Configuration;
 using WCCG.PAS.Referrals.UI.Models;
 using WCCG.PAS.Referrals.UI.Repositories;
 using WCCG.PAS.Referrals.UI.Unit.Tests.Extensions;
