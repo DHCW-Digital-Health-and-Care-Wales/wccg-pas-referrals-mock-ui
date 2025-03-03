@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Extensions;
 using WCCG.PAS.Referrals.UI.Services;
-using JsonException = System.Text.Json.JsonException;
-using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
 
@@ -100,7 +98,6 @@ public class ItemEditorModel : PageModel
         }
         catch (Exception ex)
         {
-            _logger.FailedToUpsertReferral(ex);
             HandleErrors(ex.Message);
         }
     }

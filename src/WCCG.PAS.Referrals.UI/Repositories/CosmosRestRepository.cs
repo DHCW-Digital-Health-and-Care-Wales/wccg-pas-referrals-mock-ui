@@ -1,5 +1,5 @@
-﻿using System.Globalization;
-using System.Text;
+using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using WCCG.PAS.Referrals.UI.Configs;
@@ -18,9 +18,13 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
     private const string MaxItemCountHeaderName = "max-item-count";
     private const string ContinuationTokenHeaderName = "x-ms-continuation";
     private const string UpsertHeaderName = "is-upsert";
-    private const int DefaultMaxItemCount = 10;
 
-    public CosmosRestRepository(ILogger<CosmosRestRepository<T>> logger, IHttpClientFactory httpClientFactory, IOptions<CosmosConfig> cosmosConfig)
+    private const string DetailsKey = "Details";
+    private const string NotApplicable = "N/A";
+
+    public CosmosRestRepository(ILogger<CosmosRestRepository<T>> logger,
+        IHttpClientFactory httpClientFactory,
+        IOptions<CosmosConfig> cosmosConfig)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
@@ -34,35 +38,34 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
+        using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
+
+        var maxItemCount = _cosmosConfig.MaxItemCountPerQuery.ToString(CultureInfo.InvariantCulture);
+        client.DefaultRequestHeaders.Add(MaxItemCountHeaderName, [maxItemCount]);
+
         var result = new List<T>();
         string? continuationToken = null;
 
         do
         {
-            var (items, token) = await GetAllDocumentsPagedAsync(DefaultMaxItemCount, continuationToken);
-            continuationToken = token;
+            var (items, nextContinuationToken) = await GetAllDocumentsPagedAsync(client, continuationToken);
+            continuationToken = nextContinuationToken;
             result.AddRange(items);
-        }
-        while (!string.IsNullOrEmpty(continuationToken));
+        } while (!string.IsNullOrEmpty(continuationToken));
 
         return result;
     }
 
-    private async Task<(IEnumerable<T> Items, string? ContinuationToken)> GetAllDocumentsPagedAsync(int maxItemCount, string? continuationToken = null)
+    private async Task<(IEnumerable<T> Items, string? ContinuationToken)> GetAllDocumentsPagedAsync(HttpClient client,
+        string? continuationToken)
     {
         try
         {
-            using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
-            using var request = new HttpRequestMessage(HttpMethod.Get, _cosmosConfig.ApimGetAllDocumentsEndpoint);
-            request.Headers.Add(MaxItemCountHeaderName, $"{maxItemCount}");
+            client.DefaultRequestHeaders.Remove(ContinuationTokenHeaderName);
+            client.DefaultRequestHeaders.Add(ContinuationTokenHeaderName, [continuationToken ?? string.Empty]);
 
-            if (!string.IsNullOrWhiteSpace(continuationToken))
-            {
-                request.Headers.Add(ContinuationTokenHeaderName, continuationToken);
-            }
-
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            var response = await client.GetAsync(_cosmosConfig.ApimGetAllDocumentsEndpoint);
+            await response.EnsureSuccessStatusCodeWithDataAsync(response.Content);
 
             response.Headers.TryGetValues(ContinuationTokenHeaderName, out var continuationValues);
             var nextContinuationToken = continuationValues?.FirstOrDefault();
@@ -74,7 +77,9 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         }
         catch (Exception ex)
         {
-            _logger.LogErrorRetrievingDocuments(ex);
+            var errorDetails = ex.Data[DetailsKey]?.ToString();
+
+            _logger.LogErrorRetrievingDocuments(ex, errorDetails ?? NotApplicable);
             throw;
         }
     }
@@ -86,19 +91,18 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
             using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
 
             var endpointPath = string.Format(CultureInfo.InvariantCulture, _cosmosConfig.ApimGetDocumentByIdEndpoint, id);
-            using var request = new HttpRequestMessage(HttpMethod.Get, endpointPath);
 
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            var response = await client.GetAsync(endpointPath);
+            await response.EnsureSuccessStatusCodeWithDataAsync(response.Content);
 
             var content = await response.Content.ReadAsStringAsync();
-            var documentsResponse = JsonSerializer.Deserialize<T>(content, _jsonSerializerOptions);
-
-            return documentsResponse!;
+            return JsonSerializer.Deserialize<T>(content, _jsonSerializerOptions)!;
         }
         catch (Exception ex)
         {
-            _logger.LogErrorRetrievingDocumentById(ex, id);
+            var errorDetails = ex.Data[DetailsKey]?.ToString();
+
+            _logger.LogErrorRetrievingDocumentById(ex, id, errorDetails ?? NotApplicable);
             throw;
         }
     }
@@ -108,55 +112,37 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         try
         {
             using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
-            using var request = new HttpRequestMessage(HttpMethod.Post, _cosmosConfig.ApimCreateDocumentEndpoint);
+            client.DefaultRequestHeaders.Add(UpsertHeaderName, bool.TrueString);
 
-            var documentJson = JsonSerializer.Serialize(item, _jsonSerializerOptions);
-            request.Content = new StringContent(documentJson, Encoding.UTF8, "application/json");
-            request.Headers.Add(UpsertHeaderName, bool.TrueString);
+            var response = await client.PostAsJsonAsync(_cosmosConfig.ApimCreateDocumentEndpoint, item, _jsonSerializerOptions);
+            await response.EnsureSuccessStatusCodeWithDataAsync(response.Content);
 
-            var response = await client.SendAsync(request);
-            var content = await response.Content.ReadAsStringAsync();
+            var content = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonSerializerOptions);
 
-            if (response.IsSuccessStatusCode)
+            switch (response.StatusCode)
             {
-                var documentsResponse = JsonSerializer.Deserialize<JsonElement>(content, _jsonSerializerOptions);
-                _logger.LogNewDocumentCreated(documentsResponse.GetProperty("id").GetRawText());
-
-                return true;
+                case HttpStatusCode.Created:
+                    _logger.LogNewDocumentCreated(content.GetProperty("id").GetRawText());
+                    break;
+                case HttpStatusCode.OK:
+                    _logger.LogDocumentUpdated(content.GetProperty("id").GetRawText());
+                    break;
+                default:
+                    throw new NotSupportedException();
             }
 
-            var exception = new HttpRequestException(ParseErrorResponse(content));
-            _logger.LogErrorCreatingNewDocumentById(exception);
-            throw exception;
+            if (response.StatusCode == HttpStatusCode.Created)
+            {
+            }
 
+            return true;
         }
         catch (Exception ex)
         {
-            _logger.LogErrorCreatingNewDocumentById(ex);
+            var errorDetails = ex.Data[DetailsKey]?.ToString();
+
+            _logger.LogErrorCreatingOrUpdatingDocument(ex, errorDetails ?? NotApplicable);
             throw;
-        }
-    }
-
-    private static string? ParseErrorResponse(string responseContent)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(responseContent);
-
-            if (document.RootElement.TryGetProperty("message", out var messageElement))
-            {
-                return messageElement.GetString();
-            }
-            if (document.RootElement.TryGetProperty("error", out var errorElement) && errorElement.TryGetProperty("message", out var errorMessageElement))
-            {
-                return errorMessageElement.GetString();
-            }
-
-            return responseContent;
-        }
-        catch
-        {
-            return responseContent;
         }
     }
 }
