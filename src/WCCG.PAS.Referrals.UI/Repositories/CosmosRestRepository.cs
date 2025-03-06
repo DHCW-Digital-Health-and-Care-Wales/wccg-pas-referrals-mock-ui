@@ -36,12 +36,13 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         };
     }
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public async Task<IEnumerable<T>> GetAllAsync(string apimKey)
     {
         using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
 
         var maxItemCount = _cosmosConfig.MaxItemCountPerQuery.ToString(CultureInfo.InvariantCulture);
         client.DefaultRequestHeaders.Add(MaxItemCountHeaderName, maxItemCount);
+        client.DefaultRequestHeaders.Add(_cosmosConfig.ApimSubscriptionHeaderName, apimKey);
 
         var result = new List<T>();
         string? continuationToken = null;
@@ -84,11 +85,12 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         }
     }
 
-    public async Task<T> GetByIdAsync(string id)
+    public async Task<T> GetByIdAsync(string apimKey, string id)
     {
         try
         {
             using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
+            client.DefaultRequestHeaders.Add(_cosmosConfig.ApimSubscriptionHeaderName, apimKey);
 
             var endpointPath = string.Format(CultureInfo.InvariantCulture, _cosmosConfig.ApimGetDocumentByIdEndpoint, id);
 
@@ -107,12 +109,13 @@ public class CosmosRestRepository<T> : ICosmosRepository<T>
         }
     }
 
-    public async Task<bool> UpsertAsync(T item)
+    public async Task<bool> UpsertAsync(string apimKey, T item)
     {
         try
         {
             using var client = _httpClientFactory.CreateClient(CosmosConfig.CosmosHttpClientName);
             client.DefaultRequestHeaders.Add(UpsertHeaderName, bool.TrueString);
+            client.DefaultRequestHeaders.Add(_cosmosConfig.ApimSubscriptionHeaderName, apimKey);
 
             var response = await client.PostAsJsonAsync(_cosmosConfig.ApimCreateDocumentEndpoint, item, _jsonSerializerOptions);
             await response.EnsureSuccessStatusCodeWithDataAsync(response.Content);

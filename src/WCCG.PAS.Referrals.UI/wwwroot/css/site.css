@@ -37,3 +37,7 @@ body {
 .save-button {
   width: 100px;
 }
+
+.apim-key-field{
+    width: 500px;
+}

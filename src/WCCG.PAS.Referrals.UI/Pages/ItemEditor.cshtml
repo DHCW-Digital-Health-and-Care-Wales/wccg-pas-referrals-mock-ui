@@ -26,7 +26,7 @@
         </p>
       }
     }
-    <input class="btn btn-primary btn-lg save-button" type="submit" value="Save"/>
+    <input class="btn btn-primary btn-lg save-button" disabled="@(Model.ReferralJson is null ? "disabled" : null)" type="submit" value="Save"/>
   </div>
 </form>
 

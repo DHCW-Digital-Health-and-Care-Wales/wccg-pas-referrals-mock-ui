@@ -44,7 +44,6 @@ public static class ServiceCollectionExtensions
 
             client.BaseAddress = new Uri(cosmosConfig.ApimEndpoint);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MediaTypeNames.Application.Json));
-            client.DefaultRequestHeaders.Add(cosmosConfig.ApimSubscriptionHeaderName, cosmosConfig.ApimSubscriptionKey);
             client.Timeout = TimeSpan.FromSeconds(cosmosConfig.TimeoutSeconds);
         });
     }

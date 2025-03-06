@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Services;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
 
-public class IndexModel : PageModel
+public class IndexModel : BasePageModel
 {
     private readonly IReferralService _referralService;
 
@@ -17,6 +16,20 @@ public class IndexModel : PageModel
 
     public async Task OnGet()
     {
-        Referrals = await _referralService.GetAllAsync();
+        SetApimSubscriptionKey();
+        if (string.IsNullOrWhiteSpace(ApimSubscriptionKey))
+        {
+            HandleEmptyApimKey();
+            return;
+        }
+
+        try
+        {
+            Referrals = await _referralService.GetAllAsync(ApimSubscriptionKey);
+        }
+        catch (Exception exception)
+        {
+            ErrorMessage = exception.Message;
+        }
     }
 }
