@@ -3,7 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Extensions;
-using WCCG.PAS.Referrals.UI.Pages.Shared;
+using WCCG.PAS.Referrals.UI.Pages.Shared.PartialViews;
 using WCCG.PAS.Referrals.UI.Services;
 
 namespace WCCG.PAS.Referrals.UI.Pages;

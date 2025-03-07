@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace WCCG.PAS.Referrals.UI.Pages.Shared;
+namespace WCCG.PAS.Referrals.UI.Pages.Shared.PartialViews;
 
 public class ApimSubscriptionKeyModel : PageModel
 {
