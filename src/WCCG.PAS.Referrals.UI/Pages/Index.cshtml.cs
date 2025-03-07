@@ -1,5 +1,5 @@
 using WCCG.PAS.Referrals.UI.DbModels;
-using WCCG.PAS.Referrals.UI.Pages.Shared.PartialViews;
+using WCCG.PAS.Referrals.UI.Pages.PartialViews;
 using WCCG.PAS.Referrals.UI.Services;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
