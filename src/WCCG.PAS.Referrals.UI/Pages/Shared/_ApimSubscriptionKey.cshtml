@@ -1,0 +1,15 @@
+@model ApimSubscriptionKeyModel
+
+<form asp-page-handler="ApimKey" method="post" class="d-inline">
+  <div class="float-end mt-5 mx-5">
+    <label for="apim-key">APIM Key</label>
+    <div class="d-inline-block mx-2">
+      <input id="apim-key" type="text" class="form-control apim-key-field" asp-for="ApimSubscriptionKey"/>
+    </div>
+
+    <div class="d-inline-block float-end">
+      <input class="btn btn-primary save-button" type="submit" value="Set"/>
+    </div>
+
+  </div>
+</form>

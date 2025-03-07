@@ -1,5 +1,3 @@
-@model WCCG.PAS.Referrals.UI.Pages.BasePageModel
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,26 +11,10 @@
 </head>
 <body>
 
-
 <div class="header container">
   <a class="header-link" href="/">Referrals UI</a>
-  
-  <form asp-page-handler="ApimKey" method="post" class="d-inline">
-    <div class="float-end mt-5 mx-5">
-      <label for="apim-key">APIM Key</label>
-      <div class="d-inline-block mx-2">
-        <input id="apim-key" type="text" class="form-control apim-key-field" asp-for="ApimSubscriptionKey"/>
-      </div>
-
-      <div class="d-inline-block float-end">
-        <input class="btn btn-primary save-button" type="submit" value="Set"/>
-      </div>
-
-    </div>
-  </form>
+  <partial name="_ApimSubscriptionKey"/>
 </div>
-
-
 
 <div class="container">
     <main role="main" class="pb-3">

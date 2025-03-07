@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace WCCG.PAS.Referrals.UI.Pages;
+namespace WCCG.PAS.Referrals.UI.Pages.Shared;
 
-public abstract class BasePageModel : PageModel
+public class ApimSubscriptionKeyModel : PageModel
 {
     private const string ApimKey = "ApimKey";
 
@@ -27,7 +27,7 @@ public abstract class BasePageModel : PageModel
             HttpOnly = true,
             Secure = true,
             SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddDays(1)
+            Expires = DateTimeOffset.UtcNow.AddMonths(1)
         });
 
         return Redirect(Request.Headers.Referer.ToString());

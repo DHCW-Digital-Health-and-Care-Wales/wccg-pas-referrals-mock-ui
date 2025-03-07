@@ -3,11 +3,12 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Extensions;
+using WCCG.PAS.Referrals.UI.Pages.Shared;
 using WCCG.PAS.Referrals.UI.Services;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
 
-public class ItemEditorModel : BasePageModel
+public class ItemEditorModel : ApimSubscriptionKeyModel
 {
     private readonly IReferralService _referralService;
     private readonly IValidator<ReferralDbModel> _validator;
@@ -75,7 +76,9 @@ public class ItemEditorModel : BasePageModel
     private ReferralDbModel? DeserializeReferral()
     {
         if (ReferralJson is null)
+        {
             return null;
+        }
 
         try
         {

@@ -1,9 +1,10 @@
 using WCCG.PAS.Referrals.UI.DbModels;
+using WCCG.PAS.Referrals.UI.Pages.Shared;
 using WCCG.PAS.Referrals.UI.Services;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
 
-public class IndexModel : BasePageModel
+public class IndexModel : ApimSubscriptionKeyModel
 {
     private readonly IReferralService _referralService;
 
