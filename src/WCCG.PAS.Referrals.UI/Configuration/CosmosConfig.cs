@@ -16,9 +16,6 @@ public class CosmosConfig
     public required string ApimSubscriptionHeaderName { get; init; }
 
     [Required]
-    public required string ApimSubscriptionKey { get; init; }
-
-    [Required]
     public required string ApimGetAllDocumentsEndpoint { get; init; }
 
     [Required]

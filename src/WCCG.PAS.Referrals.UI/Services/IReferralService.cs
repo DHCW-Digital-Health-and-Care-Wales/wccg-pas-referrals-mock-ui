@@ -4,7 +4,7 @@ namespace WCCG.PAS.Referrals.UI.Services;
 
 public interface IReferralService
 {
-    Task<bool> UpsertAsync(ReferralDbModel item);
-    Task<IEnumerable<ReferralDbModel>> GetAllAsync();
-    Task<ReferralDbModel> GetByIdAsync(string id);
+    Task<bool> UpsertAsync(string apimKey, ReferralDbModel item);
+    Task<IEnumerable<ReferralDbModel>> GetAllAsync(string apimKey);
+    Task<ReferralDbModel> GetByIdAsync(string apimKey, string id);
 }

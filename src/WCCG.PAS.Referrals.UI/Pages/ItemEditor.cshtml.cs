@@ -1,14 +1,14 @@
 using System.Text.Json;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using WCCG.PAS.Referrals.UI.DbModels;
 using WCCG.PAS.Referrals.UI.Extensions;
+using WCCG.PAS.Referrals.UI.Pages.PartialViews;
 using WCCG.PAS.Referrals.UI.Services;
 
 namespace WCCG.PAS.Referrals.UI.Pages;
 
-public class ItemEditorModel : PageModel
+public class ItemEditorModel : ApimSubscriptionKeyModel
 {
     private readonly IReferralService _referralService;
     private readonly IValidator<ReferralDbModel> _validator;
@@ -16,7 +16,6 @@ public class ItemEditorModel : PageModel
     private readonly JsonSerializerOptions _jsonOptions = new() { WriteIndented = true };
 
     public bool? IsSaved { get; set; }
-    public string? ErrorMessage { get; set; }
 
     [BindProperty]
     public required string? ReferralJson { get; set; }
@@ -30,16 +29,32 @@ public class ItemEditorModel : PageModel
 
     public async Task OnGet(string id)
     {
-        var referral = await _referralService.GetByIdAsync(id);
+        SetApimSubscriptionKey();
+        if (string.IsNullOrWhiteSpace(ApimSubscriptionKey))
+        {
+            IsSaved = false;
+            HandleEmptyApimKey();
+            return;
+        }
 
-        ReferralJson = JsonSerializer.Serialize(referral, _jsonOptions);
+        try
+        {
+            var referral = await _referralService.GetByIdAsync(ApimSubscriptionKey, id);
+            ReferralJson = JsonSerializer.Serialize(referral, _jsonOptions);
+        }
+        catch (Exception exception)
+        {
+            HandleErrors(exception.Message);
+        }
     }
 
     public async Task<IActionResult> OnPost()
     {
-        if (ReferralJson is null)
+        SetApimSubscriptionKey();
+        if (string.IsNullOrWhiteSpace(ApimSubscriptionKey))
         {
-            return BadRequest();
+            HandleEmptyApimKey();
+            return Page();
         }
 
         var referral = DeserializeReferral();
@@ -60,6 +75,11 @@ public class ItemEditorModel : PageModel
 
     private ReferralDbModel? DeserializeReferral()
     {
+        if (ReferralJson is null)
+        {
+            return null;
+        }
+
         try
         {
             return JsonSerializer.Deserialize<ReferralDbModel>(ReferralJson!);
@@ -93,7 +113,7 @@ public class ItemEditorModel : PageModel
     {
         try
         {
-            await _referralService.UpsertAsync(referral);
+            await _referralService.UpsertAsync(ApimSubscriptionKey!, referral);
             IsSaved = true;
         }
         catch (Exception ex)

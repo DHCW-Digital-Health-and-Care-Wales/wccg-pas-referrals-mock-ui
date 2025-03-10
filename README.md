@@ -13,7 +13,6 @@ To configure the project open user secrets file `secrets.json` (not included in 
 ```
 {
   "Cosmos": {
-    "ApimSubscriptionKey": "<YOUR_APIM_SUBSCRIPTION_KEY>",
     "ApimEndpoint": "<APIM_GATEWAY_URL>"
   }
 }
