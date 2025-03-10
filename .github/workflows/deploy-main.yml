@@ -23,5 +23,5 @@ jobs:
             --name "${{ vars.CONTAINER_APP_NAME }}" \
             --resource-group "${{ vars.RESOURCE_GROUP }}" \
             --image "${{ vars.AZURE_DEV_ACR_REGISTRY_URL }}/${{ vars.IMAGE_NAME }}:${{ github.event.inputs.image_tag }}" \
-            --revision-suffix "${{github.sha}}" \
+            --revision-suffix "v${{github.run_number}}" \
             --output json
